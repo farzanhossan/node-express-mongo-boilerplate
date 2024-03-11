@@ -15,6 +15,7 @@ export type NewCreatedUserPreference = IUserPreference;
 export interface IUserPreferenceDoc extends IUserPreference, Document {}
 
 export interface IUserPreferenceModel extends Model<IUserPreferenceDoc> {
+  isAlreadySetPreference(user: any, excludeUserPreferenceId?: mongoose.Types.ObjectId): Promise<boolean>;
   paginate(filter: Record<string, any>, options: Record<string, any>): Promise<QueryResult>;
 }
 

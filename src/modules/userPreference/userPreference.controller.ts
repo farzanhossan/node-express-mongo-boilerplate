@@ -13,7 +13,7 @@ export const createUserPreference = catchAsync(async (req: Request, res: Respons
 });
 
 export const getUserPreferences = catchAsync(async (req: Request, res: Response) => {
-  const filter = pick(req.query, []);
+  const filter = pick(req.query, ['user']);
   const options: IOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
   const result = await userPreferenceService.queryUserPreferences(filter, options);
   res.send(result);
@@ -45,5 +45,15 @@ export const deleteUserPreference = catchAsync(async (req: Request, res: Respons
   if (typeof req.params['userPreferenceId'] === 'string') {
     await userPreferenceService.deleteUserPreferenceById(new mongoose.Types.ObjectId(req.params['userPreferenceId']));
     res.status(httpStatus.NO_CONTENT).send();
+  }
+});
+
+export const getScheduleFromUserPreference = catchAsync(async (req: Request, res: Response) => {
+  if (typeof req.params['userPreferenceId'] === 'string') {
+    const plannedSchedule = await userPreferenceService.getScheduleFromUserPreference(
+      new mongoose.Types.ObjectId(req.params['userPreferenceId'])
+    );
+
+    res.send(plannedSchedule);
   }
 });

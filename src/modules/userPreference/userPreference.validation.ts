@@ -17,6 +17,7 @@ export const createUserPreference = {
 
 export const getUserPreferences = {
   query: Joi.object().keys({
+    user: Joi.string(),
     sortBy: Joi.string(),
     projectBy: Joi.string(),
     limit: Joi.number().integer(),

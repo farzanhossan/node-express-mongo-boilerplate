@@ -4,6 +4,7 @@ import ApiError from '../errors/ApiError';
 import { IOptions, QueryResult } from '../paginate/paginate';
 import { IUserPreferenceDoc, NewCreatedUserPreference, UpdateUserPreferenceBody } from './userPreference.interfaces';
 import UserPreference from './userPreference.model';
+import generateStudyPlan from '../utils/suggestedSchedule';
 
 /**
  * Create a userPreference
@@ -11,6 +12,9 @@ import UserPreference from './userPreference.model';
  * @returns {Promise<IUserPreferenceDoc>}
  */
 export const createUserPreference = async (userPreferenceBody: NewCreatedUserPreference): Promise<IUserPreferenceDoc> => {
+  // if (await UserPreference.isAlreadySetPreference(userPreferenceBody.user)) {
+  //   throw new ApiError(httpStatus.BAD_REQUEST, 'This User already set preference.');
+  // }
   return UserPreference.create(userPreferenceBody);
 };
 
@@ -67,4 +71,18 @@ export const deleteUserPreferenceById = async (
   }
   await userPreference.deleteOne();
   return userPreference;
+};
+
+export const getScheduleFromUserPreference = async (id: mongoose.Types.ObjectId) => {
+  const userPreference = await UserPreference.findById(id).lean();
+  if (!userPreference) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'UserPreference not found');
+  }
+  return generateStudyPlan(
+    userPreference?.dayStartTime,
+    userPreference?.dayEndTime,
+    userPreference?.tasks || [],
+    userPreference?.classes || [],
+    userPreference?.partTimeJobHours || []
+  );
 };

@@ -36,6 +36,12 @@ router
     userPreferenceController.deleteUserPreference
   );
 
+router.route('/getSuggestedSchedule/:userPreferenceId').get(
+  auth('getSuggestedSchedule'),
+  // validate(userPreferenceValidation.getUserPreference),
+  userPreferenceController.getScheduleFromUserPreference
+);
+
 export default router;
 
 /**
@@ -108,6 +114,11 @@ export default router;
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: query
+ *         name: user
+ *         schema:
+ *           type: string
+ *         description: User id
  *       - in: query
  *         name: sortBy
  *         schema:
@@ -259,6 +270,37 @@ export default router;
  *     responses:
  *       "200":
  *         description: No content
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ *       "404":
+ *         $ref: '#/components/responses/NotFound'
+ */
+
+/**
+ * @swagger
+ * /userPreferences/getSuggestedSchedule/{id}:
+ *   get:
+ *     summary: Get a Suggested Schedule From userPreference
+ *     description: Logged in userPreferences can fetch only their own userPreference information. Only admins can fetch other userPreferences.
+ *     tags: [UserPreferences]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: UserPreference id
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *                $ref: '#/components/schemas/UserPreference'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":

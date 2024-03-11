@@ -42,6 +42,14 @@ const userPreferenceSchema = new mongoose.Schema<IUserPreferenceDoc, IUserPrefer
 userPreferenceSchema.plugin(toJSON);
 userPreferenceSchema.plugin(paginate);
 
+userPreferenceSchema.static(
+  'isAlreadySetPreference',
+  async function (user: any, excludeUserPreferenceId: mongoose.ObjectId): Promise<boolean> {
+    const userPreference = await this.findOne({ user, _id: { $ne: excludeUserPreferenceId } });
+    return !!userPreference;
+  }
+);
+
 const UserPreference = mongoose.model<IUserPreferenceDoc, IUserPreferenceModel>('UserPreference', userPreferenceSchema);
 
 export default UserPreference;
