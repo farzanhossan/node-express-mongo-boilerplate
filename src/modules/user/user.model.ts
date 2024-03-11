@@ -29,12 +29,12 @@ const userSchema = new mongoose.Schema<IUserDoc, IUserModel>(
       type: String,
       required: true,
       trim: true,
-      minlength: 8,
-      validate(value: string) {
-        if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
-          throw new Error('Password must contain at least one letter and one number');
-        }
-      },
+      minlength: 6,
+      // validate(value: string) {
+      //   if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
+      //     throw new Error('Password must contain at least one letter and one number');
+      //   }
+      // },
       private: true, // used by the toJSON plugin
     },
     role: {

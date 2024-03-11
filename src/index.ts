@@ -8,6 +8,7 @@ mongoose.connect(config.mongoose.url).then(() => {
   logger.info('Connected to MongoDB');
   server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);
+    logger.info(`Docs:  http://localhost:${config.port}/v1/docs`);
   });
 });
 
