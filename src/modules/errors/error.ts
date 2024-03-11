@@ -5,6 +5,7 @@ import httpStatus from 'http-status';
 import config from '../../config/config';
 import { logger } from '../logger';
 import ApiError from './ApiError';
+import { resSend } from '../response/response';
 
 export const errorConverter = (err: any, _req: Request, _res: Response, next: NextFunction) => {
   let error = err;
@@ -28,8 +29,9 @@ export const errorHandler = (err: ApiError, _req: Request, res: Response, _next:
   res.locals['errorMessage'] = err.message;
 
   const response = {
-    code: statusCode,
+    status: statusCode,
     message,
+    isSuccess: false,
     ...(config.env === 'development' && { stack: err.stack }),
   };
 
@@ -37,5 +39,5 @@ export const errorHandler = (err: ApiError, _req: Request, res: Response, _next:
     logger.error(err);
   }
 
-  res.status(statusCode).send(response);
+  resSend(response, statusCode, res);
 };

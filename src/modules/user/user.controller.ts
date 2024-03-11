@@ -6,17 +6,18 @@ import ApiError from '../errors/ApiError';
 import pick from '../utils/pick';
 import { IOptions } from '../paginate/paginate';
 import * as userService from './user.service';
+import { resSend } from '../response/response';
 
 export const createUser = catchAsync(async (req: Request, res: Response) => {
   const user = await userService.createUser(req.body);
-  res.status(httpStatus.CREATED).send(user);
+  resSend(user, httpStatus.CREATED, res);
 });
 
 export const getUsers = catchAsync(async (req: Request, res: Response) => {
   const filter = pick(req.query, ['name', 'role']);
   const options: IOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
   const result = await userService.queryUsers(filter, options);
-  res.send(result);
+  resSend(result, httpStatus.OK, res);
 });
 
 export const getUser = catchAsync(async (req: Request, res: Response) => {
@@ -25,20 +26,20 @@ export const getUser = catchAsync(async (req: Request, res: Response) => {
     if (!user) {
       throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
     }
-    res.send(user);
+    resSend(user, httpStatus.OK, res);
   }
 });
 
 export const updateUser = catchAsync(async (req: Request, res: Response) => {
   if (typeof req.params['userId'] === 'string') {
     const user = await userService.updateUserById(new mongoose.Types.ObjectId(req.params['userId']), req.body);
-    res.send(user);
+    resSend(user, httpStatus.OK, res);
   }
 });
 
 export const deleteUser = catchAsync(async (req: Request, res: Response) => {
   if (typeof req.params['userId'] === 'string') {
     await userService.deleteUserById(new mongoose.Types.ObjectId(req.params['userId']));
-    res.status(httpStatus.NO_CONTENT).send();
+    resSend(null, httpStatus.NO_CONTENT, res, 'Deleted successfully');
   }
 });
