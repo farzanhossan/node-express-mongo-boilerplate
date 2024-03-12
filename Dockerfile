@@ -1,26 +1,27 @@
 # development stage
 FROM node:14-alpine as base
 
-WORKDIR /usr/src/app
+RUN apk add --no-cache \
+    make \
+    g++ \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-COPY package.json yarn.lock tsconfig.json ecosystem.config.json ./
+WORKDIR /app
 
-COPY ./src ./src
+COPY . .
 
-RUN ls -a
+RUN yarn
+RUN yarn build
 
-RUN yarn install --pure-lockfile && yarn compile
+EXPOSE 4002
 
-# production stage
+RUN ["chmod", "+x", "./entrypoint.sh"]
 
-FROM base as production
-
-WORKDIR /usr/prod/app
-
-ENV NODE_ENV=production
-
-COPY package.json yarn.lock ecosystem.config.json ./
-
-RUN yarn install --production --pure-lockfile
-
-COPY --from=base /usr/src/app/dist ./dist
+ENTRYPOINT [ "sh", "./entrypoint.sh" ]
