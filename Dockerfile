@@ -18,7 +18,7 @@ WORKDIR /app
 COPY . .
 
 RUN yarn
-RUN yarn build
+RUN yarn compile
 
 EXPOSE 4002
 
