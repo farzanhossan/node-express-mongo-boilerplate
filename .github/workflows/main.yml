@@ -1,0 +1,100 @@
+name: Routine Planner Dev CI
+
+on:
+  push:
+    branches: [main]
+
+env:
+  PORT: 4002
+  MONGODB_URL: mongodb+srv://root:root@cluster0.uej52dg.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+  JWT_SECRET: thisisasamplesecret
+  JWT_ACCESS_EXPIRATION_MINUTES: 30
+  JWT_REFRESH_EXPIRATION_DAYS: 30
+  JWT_RESET_PASSWORD_EXPIRATION_MINUTES: 10
+  JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: 10
+  CLIENT_URL: http://localhost:4002
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Logging to docker
+        run: docker login -u ${{secrets.DOCKER_USER}} -p ${{secrets.DOCKER_PASSWORD}}
+
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag ${{secrets.DOCKER_USER}}/routine-planner-stg:latest
+
+      - name: Docker Push
+        run: docker push ${{secrets.DOCKER_USER}}/routine-planner-stg:latest
+
+  Deploy:
+    needs: Build
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Logging to docker
+        run: docker login -u ${{secrets.DOCKER_USER}} -p ${{secrets.DOCKER_PASSWORD}}
+
+      - name: Deploy To Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          port: ${{ secrets.PORT }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            echo "Logging to docker hub"
+            docker login -u ${{secrets.DOCKER_USER}} -p ${{secrets.DOCKER_PASSWORD}} 
+
+            echo "Stopping previous build"
+            docker stop routine-planner-stg
+
+            echo "Removing previous build"
+            docker rm routine-planner-stg
+
+            echo "Removing old image from local"
+            docker rmi ${{secrets.DOCKER_USER}}/routine-planner-stg:latest
+
+            echo "Pulling latest image from docker hub"
+            docker pull ${{secrets.DOCKER_USER}}/routine-planner-stg:latest
+
+  Run:
+    needs: Deploy
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Logging to docker
+        run: docker login -u ${{secrets.DOCKER_USER}} -p ${{secrets.DOCKER_PASSWORD}}
+
+      - name: Deploy To Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          port: ${{ secrets.PORT }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            echo "Logging to docker hub"
+            docker login -u ${{secrets.DOCKER_USER}} -p ${{secrets.DOCKER_PASSWORD}} 
+
+            echo "Starting latest build"
+            docker run -e NODE_ENV=staging -d \
+              --restart always \
+              -p 4002:4002 \
+              -v /var/www/uploads:/uploads \
+              --name routine-planner-stg \
+              ${{secrets.DOCKER_USER}}/routine-planner-stg:latest
+
+            echo "Deploy Done"
