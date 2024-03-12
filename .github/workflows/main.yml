@@ -91,10 +91,11 @@ jobs:
 
             echo "Starting latest build"
             docker run -e NODE_ENV=staging -d \
-              --restart always \
-              -p 4002:4002 \
-              -v /var/www/uploads:/uploads \
-              --name routine-planner-stg \
-              ${{secrets.DOCKER_USER}}/routine-planner-stg:latest
+            --restart always --network host \
+            -dit --name routine-planner-stg \
+            -p 4002:4002 \
+            -v /var/www/uploads:/uploads \
+            --name routine-planner-stg \
+            ${{secrets.DOCKER_USER}}/routine-planner-stg:latest
 
             echo "Deploy Done"
