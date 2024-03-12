@@ -26,6 +26,10 @@ RUN yarn compile
 
 EXPOSE 4002
 
+RUN ls -l
+
+COPY entrypoint.sh ./
+
 RUN ["chmod", "+x", "./entrypoint.sh"]
 
 ENTRYPOINT [ "sh", "./entrypoint.sh" ]
