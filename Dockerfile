@@ -13,9 +13,13 @@ RUN apk add --no-cache \
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-WORKDIR /app
+# WORKDIR /app
+WORKDIR /usr/src/app
 
-COPY . .
+# COPY . .
+COPY package.json yarn.lock tsconfig.json ecosystem.config.json ./
+
+COPY ./src ./src
 
 RUN yarn
 RUN yarn compile
