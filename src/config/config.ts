@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import 'dotenv/config';
+import { Config } from './config.type';
 
 const envVarsSchema = Joi.object()
   .keys({
@@ -30,7 +31,7 @@ if (error) {
   throw new Error(`Config validation error: ${error.message}`);
 }
 
-const config = {
+const config: Config = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   mongoose: {
